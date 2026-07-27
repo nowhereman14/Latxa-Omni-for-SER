@@ -64,20 +64,23 @@ def evaluation(args):
     model.eval()
     
     manifest = load_manifest(args.manifest_path)
-    test_entries = [e for e in manifest if e["split"] == "test"]
-    print(f"Test: {len(test_entries)}")
+    entries = [e for e in manifest if e["split"] == args.split]
+    if args.limit:
+        entries = entries[:args.limit]
+    print(f"{args.split}: {len(entries)}")
     
     y_true, y_pred, speakers = [], [], []
-    for i, entry in enumerate(test_entries):
+    for i, entry in enumerate(entries):
         pred = prediction(entry["input"], tokenizer, model, args.conv_mode, args.mel_size, device)
         y_true.append(entry["output"])
         y_pred.append(pred)
         speakers.append(entry["speaker"])
         if i % 100 == 0:
-            print(f"Processed {i}/{len(test_entries)}")
+            print(f"Processed {i}/{len(entries)}")
 
     results = {"y_true": y_true, "y_pred": y_pred, "speakers": speakers}
-    with open("test_predictions.json", "w", encoding="utf-8") as f:
+    output_filename = f"{args.split}_predictions.json"
+    with open(output_filename, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(classification_report(y_true, y_pred))
     print(confusion_matrix(y_true, y_pred, labels=sorted(set(y_true))))
@@ -87,8 +90,12 @@ if __name__ == "__main__":
     parser.add_argument("--model-path", type=str, default="saves/final")
     parser.add_argument("--model-base", type=str, default="Latxa-3.1-8B-Omni")
     parser.add_argument("--manifest-path", type=str, default="manifest.jsonl")
+    parser.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
+    parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--conv_mode", type=str, default="llama_3")
     parser.add_argument("--mel_size", type=int, default=128)
     parser.add_argument("--s2s", action="store_true", default=False)
     args = parser.parse_args()
     evaluation(args)
+
+#python evaluation.py --model-path saves_r8_adapter/checkpoint-150 --split val --limit 200

@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-gpu=4 # Number of CPU cores
 #SBATCH --mem-per-gpu=128GB
-#SBATCH --time=3-00:00
+#SBATCH --time=24:00:00
 #SBATCH --output=/scratch/agarciam/eval_%j.out
 #SBATCH --error=/scratch/agarciam/eval_%j.err
 
@@ -23,4 +23,4 @@ which python
 which deepspeed
 
 cd /scratch/agarciam/tfm/models/Latxa-Omni-Emotion
-python -u evaluation.py --model-path saves/final --model-base Latxa-3.1-8B-Omni
+python -u evaluation.py --model-path saves_r8_adapter/final --model-base Latxa-3.1-8B-Omni
