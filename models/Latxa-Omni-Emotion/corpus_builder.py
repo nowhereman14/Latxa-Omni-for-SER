@@ -20,18 +20,16 @@ def parse_ttsdb(folder_path, _file_name):
     return speaker, emotion
 
 TAG_MAP = {
-            'angry': 'has',
-            'happy': 'poz',
-            'disgusted': 'naz',
-            'sad': 'tri',
-            'scared': 'bel',
-            'surprised': 'har',
-            'neutral': 'las',
-            'HAR': 'har',
-            'HAS': 'has',
-            'POZ': 'poz',
-            'TRI': 'tri',
-            'NEU': 'las'
+            'angry': 'haserrea',
+            'happy': 'poza',
+            'sad': 'tristura',
+            'surprised': 'harridura',
+            'neutral': 'neutroa',
+            'HAR': 'harridura',
+            'HAS': 'haserrea',
+            'POZ': 'poza',
+            'TRI': 'tristura',
+            'NEU': 'neutroa'
 }
 
 def get_tag(emotion):
@@ -51,10 +49,9 @@ CORPUS_PARSERS = {
         # no emotion annotation
 TTSDB_BASE = "/scratch/agarciam/tfm/data/TTS_DB"
 TTSDB_FOLDERS = [
-"karolina_eu", "karolina_eu_angry", "karolina_eu_disgusted",
-"karolina_eu_happy", "karolina_eu_sad", "karolina_eu_scared", "karolina_eu_surprised",
-"pello2004_eu", "pello2004_eu_angry", "pello2004_eu_disgusted",
-"pello2004_eu_happy", "pello2004_eu_sad", "pello2004_eu_scared", "pello2004_eu_surprised",
+"karolina_eu", "karolina_eu_angry",
+"karolina_eu_happy", "karolina_eu_sad", "karolina_eu_surprised",
+"pello2004_eu", "pello2004_eu_angry", "pello2004_eu_happy", "pello2004_eu_sad", "pello2004_eu_surprised",
 "jaione_eu", "jaione_eu_angry", "jaione_eu_happy", "jaione_eu_sad",
 "kepa_eu", "kepa_eu_angry", "kepa_eu_happy", "kepa_eu_sad"]
 
@@ -134,6 +131,6 @@ if __name__ == "__main__":
     for split in ["train", "val", "test"]:
         count = sum(1 for i in all_entries if i["split"] == split)
         print(f"  {split}: {count}")
-        for emotion in ["has", "poz", "naz", "tri", "bel", "har", "las"]:
+        for emotion in ["haserrea", "poza", "tristura", "harridura", "neutroa"]:
             emo_count = sum(1 for e in all_entries if e["split"] == split and e["output"] == emotion)
             print(      f"{emotion}: {emo_count}")
