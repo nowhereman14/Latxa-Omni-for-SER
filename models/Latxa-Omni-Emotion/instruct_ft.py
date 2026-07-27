@@ -2,11 +2,11 @@ import json
 import argparse
 import os
 import pandas as pd
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
-from transformers import TrainingArguments, EarlyStoppingCallback
-from transformers import Trainer
+from transformers import Trainer, TrainingArguments, EarlyStoppingCallback, TrainerCallback
 from peft import LoraConfig, get_peft_model
 import whisper
 from system_prompt import load_prompt
@@ -65,6 +65,14 @@ class SERDataset(Dataset):
     def __len__(self):
         return len(self.entries)
 
+class EarlyEvalCallback(TrainerCallback):
+    def __init__(self, early_eval_steps=(10, 25, 50, 75, 100)):
+        self.early_eval_steps = set(early_eval_steps)
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if state.global_step in self.early_eval_steps:
+            control.should_evaluate = True
+        return control
 
 def collate_fn(batch):
     for i in range(len(batch)):
@@ -86,6 +94,13 @@ def apply_lora(model, rank):
         task_type="CAUSAL_LM"
     )
     model = get_peft_model(model, config)
+
+    #Unfreeze the Speech Adaptor besides LoRA
+    
+    for name, param in model.named_parameters():
+        if "speech_projector" in name or "mm_projector" in name:  # nombres a confirmar con el listado de módulos
+            param.requires_grad = True
+
     model.print_trainable_parameters()
     return model
 
@@ -103,7 +118,13 @@ def fine_tuning(args):
     print(tokenizer.eos_token, tokenizer.eos_token_id)
     print(tokenizer.pad_token, tokenizer.pad_token_id)
 
-    model = apply_lora(model, rank = 32)
+    model = apply_lora(model, rank = 8)
+
+    print("=== Speech Projector trainable parameters ===")
+    for name, param in model.named_parameters():
+        if "speech_projector" in name:
+            print(name, "- requires_grad:", param.requires_grad)
+
     manifest = load_manifest(args.manifest_path)
     train_entries = [e for e in manifest if e["split"] == "train"]
     val_entries = [e for e in manifest if e["split"] == "val"]
@@ -131,13 +152,13 @@ def fine_tuning(args):
         num_train_epochs=args.num_train_epochs,
         logging_steps=1,
         save_strategy='steps',
-        save_steps=150, 
+        save_steps=150,
         eval_strategy='steps',
         eval_steps=150,
         load_best_model_at_end=True,
         metric_for_best_model='eval_loss',
         greater_is_better=False,
-        save_total_limit=2,
+        save_total_limit=20,
         seed=3407,
         bf16=True,
         fp16=False,
@@ -152,12 +173,13 @@ def fine_tuning(args):
         train_dataset=train_ds,
         eval_dataset=val_ds,
         data_collator=collate_fn,
-        callbacks= [EarlyStoppingCallback(early_stopping_patience=3)]
+        callbacks= [EarlyStoppingCallback(early_stopping_patience=3), EarlyEvalCallback()]
     )
 
     trainer.train()
 
     history = trainer.state.log_history
+
     steps = [x['step'] for x in history if 'loss' in x]
     loss = [x['loss'] for x in history if 'loss' in x]
 
@@ -166,17 +188,14 @@ def fine_tuning(args):
 
     plt.figure(figsize=(10, 6))
     loss_smooth = pd.Series(loss).rolling(window=20, min_periods=1).mean()
-    plt.plot(steps, loss_smooth, label='Train Loss', color='red', alpha=0.5)
-    if eval_loss:
-        plt.plot(eval_steps, eval_loss, label='Eval Loss', color='blue', marker='o')
-
-    plt.title('Learning Curve')
+    plt.plot(steps, loss_smooth, label='Train Loss', color='red', alpha=0.6)
+    plt.plot(eval_steps, eval_loss, label='Eval Loss', color='blue', marker='o')
+    plt.title('Learning Curve - Loss')
     plt.xlabel('Steps')
     plt.ylabel('Loss')
     plt.legend()
     plt.grid(True)
-
-    plt.savefig("training_curve.png")
+    plt.savefig("training_curve_loss.png")
     print("Graphic saved")
 
     trainer.save_model(os.path.join(args.output_dir, "final"))
