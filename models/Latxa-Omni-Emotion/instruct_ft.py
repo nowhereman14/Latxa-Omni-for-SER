@@ -7,10 +7,9 @@ import torch
 from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback, TrainerCallback
-from peft import LoraConfig, get_peft_model
 import whisper
 from system_prompt import load_prompt
-from omni_speech.conversation import conv_templates, SeparatorStyle
+from omni_speech.conversation import conv_templates
 from omni_speech.model.builder import create_model
 from omni_speech.datasets.preprocess import tokenizer_speech_token
 from omni_speech.constants import IGNORE_INDEX
@@ -86,7 +85,7 @@ def collate_fn(batch):
     speech_lengths = torch.stack(speech_lengths, dim=0)
     return {"input_ids":input_ids,"labels":labels, "speech":speech_tensors, "speech_lengths":speech_lengths}
 
-def apply_lora(model, rank):
+'''def apply_lora(model, rank):
     config = LoraConfig(
         r = rank,
         lora_alpha=64,
@@ -102,7 +101,7 @@ def apply_lora(model, rank):
             param.requires_grad = True
 
     model.print_trainable_parameters()
-    return model
+    return model'''
 
 def fine_tuning(args):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'    
@@ -117,8 +116,6 @@ def fine_tuning(args):
 
     print(tokenizer.eos_token, tokenizer.eos_token_id)
     print(tokenizer.pad_token, tokenizer.pad_token_id)
-
-    model = apply_lora(model, rank = 8)
 
     print("=== Speech Projector trainable parameters ===")
     for name, param in model.named_parameters():
@@ -158,12 +155,12 @@ def fine_tuning(args):
         load_best_model_at_end=True,
         metric_for_best_model='eval_loss',
         greater_is_better=False,
-        save_total_limit=20,
+        save_total_limit=3,
         seed=3407,
         bf16=True,
         fp16=False,
         report_to="none",
-        #deepspeed="/scratch/agarciam/tfm/models/Latxa-Omni-Emotion/omni_speech/train/ds_config.json",
+        deepspeed="/scratch/agarciam/tfm/models/Latxa-Omni-Emotion/omni_speech/train/ds_config.json",
     )
 
     trainer = Trainer(
@@ -213,6 +210,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_train_epochs", type=int, default=3)
     parser.add_argument("--train_batch_size", type=int, default=16)
     parser.add_argument("--gradient_accumulation_steps", type=int, default=4)
+    parser.add_argument("--local_rank", type=int, default=-1)
     parser.add_argument("--output_dir", type=str, default='saves')
     args = parser.parse_args()
     fine_tuning(args)

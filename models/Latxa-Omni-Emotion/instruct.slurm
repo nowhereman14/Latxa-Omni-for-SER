@@ -3,10 +3,10 @@
 #SBATCH --account=hitz-exclusive
 #SBATCH --partition=hitz-exclusive
 #SBATCH --qos=hitz-exclusive
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 #SBATCH --cpus-per-gpu=4 # Number of CPU cores
 #SBATCH --mem-per-gpu=128GB # RAM memory needed
-#SBATCH --time=48:00:00
+#SBATCH --time=72:00:00
 #SBATCH --output=/scratch/agarciam/instruct_%j.out
 #SBATCH --error=/scratch/agarciam/instruct_%j.err
 
@@ -26,4 +26,4 @@ which python
 which deepspeed
 
 cd /scratch/agarciam/tfm/models/Latxa-Omni-Emotion
-python instruct_ft.py --num_train_epochs 3 --train_batch_size 4 --gradient_accumulation_steps 8 --output_dir saves_r8_adapter
+deepspeed --num_gpus=$GPUS_PER_NODE instruct_ft.py --num_train_epochs 3 --train_batch_size 2 --gradient_accumulation_steps 8 --output_dir saves_full_ft
