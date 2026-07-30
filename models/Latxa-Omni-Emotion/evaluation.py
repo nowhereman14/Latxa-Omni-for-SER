@@ -1,6 +1,7 @@
 import json
 import argparse
 import time
+import random
 import torch
 import whisper
 from sklearn.metrics import classification_report, confusion_matrix
@@ -53,7 +54,7 @@ def evaluation(args):
     tokenizer, model, context_len = create_model(
         model_path= args.model_path,
         model_base = args.model_base,
-        is_lora= True,
+        is_lora= False,
         s2s= args.s2s,
         device= device)
     print("¿CUDA available?:", torch.cuda.is_available(), flush=True)
@@ -66,6 +67,8 @@ def evaluation(args):
     manifest = load_manifest(args.manifest_path)
     entries = [e for e in manifest if e["split"] == args.split]
     if args.limit:
+        random.seed(42)
+        random.shuffle(entries)
         entries = entries[:args.limit]
     print(f"{args.split}: {len(entries)}")
     
