@@ -53,7 +53,7 @@ TTSDB_FOLDERS = [
 "karolina_eu_happy", "karolina_eu_sad", "karolina_eu_surprised",
 "pello2004_eu", "pello2004_eu_angry", "pello2004_eu_happy", "pello2004_eu_sad", "pello2004_eu_surprised",
 "jaione_eu", "jaione_eu_angry", "jaione_eu_happy", "jaione_eu_sad",
-"kepa_eu", "kepa_eu_angry", "kepa_eu_happy", "kepa_eu_sad"]
+"kepa_eu", "kepa_eu_angry", "kepa_eu_happy", "kepa_eu_sad", "amaia_eu", "inaki_eu"]
 
 # --- EMOZIOAK ---
 EMOZIOAK_BASE = "/scratch/agarciam/tfm/data/HiTZSpeechSynthesisEmozioak_Dataset"
@@ -83,9 +83,9 @@ def build_entries(folder_path):
         entries.append({"input": full_path, "output": emotion, "speaker": speaker})
     return entries
 
-TRAIN_SPEAKERS = {"karolina", "pello2004", "jaione", "kepa", "Antton"}
-VAL_SPEAKERS = {"estitxu"}
-TEST_SPEAKERS = {"Maider", "mikel"}
+TRAIN_SPEAKERS = {"karolina", "jaione", "Antton", "estitxu", "mikel"}
+VAL_SPEAKERS = {"pello2004"}
+TEST_SPEAKERS = {"Maider", "kepa", "amaia","inaki"}
 
 def assign_split(speaker):
     if speaker in TRAIN_SPEAKERS:
