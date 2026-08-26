@@ -1,3 +1,4 @@
+import os
 import torch
 import torchaudio
 from omni_speech.conversation import conv_templates, SeparatorStyle
@@ -7,6 +8,8 @@ import whisper
 import numpy as np
 from speechbrain.inference.vocoders import UnitHIFIGAN
 from system_prompt import load_prompt 
+
+DATA_ROOT = os.environ.get("SER_DATA_ROOT", "/scratch/agarciam/tfm/data")
 
 def ctc_postprocess(tokens, blank):
     _toks = tokens.squeeze(0).tolist()
@@ -26,9 +29,9 @@ tokenizer, model, context_len = load_pretrained_model(model_path, model_base, is
 hifigan = UnitHIFIGAN.from_hparams(source="HiFiGAN-Basque-Maider-Antton", run_opts={"device":'cuda'})
 
 qs = load_prompt()
-speech_file_1 = '/scratch/agarciam/tfm/data/TTS_DB/jaione_eu_angry/wav/JIEA0396.wav'
-speech_file_2 = '/scratch/agarciam/tfm/data/TTS_DB/pello2004_eu_sad/wav/TBT303.wav'
-speech_file_3 = '/scratch/agarciam/tfm/data/TTS_DB/karolina_eu_happy/wav/TBP408.wav'
+speech_file_1 = os.path.join(DATA_ROOT, "TTS_DB", "jaione_eu_angry", "wav", "JIEA0396.wav")
+speech_file_2 = os.path.join(DATA_ROOT, "TTS_DB", "pello2004_eu_sad", "wav", "TBT303.wav")
+speech_file_3 = os.path.join(DATA_ROOT, "TTS_DB", "karolina_eu_happy", "wav", "TBP408.wav")
 audio_1 = whisper.load_audio(speech_file_1)
 audio_2 = whisper.load_audio(speech_file_2)
 audio_3 = whisper.load_audio(speech_file_3)

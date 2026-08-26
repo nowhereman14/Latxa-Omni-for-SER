@@ -23,4 +23,6 @@ which python
 which deepspeed
 
 cd /scratch/agarciam/tfm/models/Latxa-Omni-Emotion
-python -u evaluation.py --model-path saves_full_ft/final --split test
+#python -u evaluation.py --model-path Latxa-3.1-8B-Omni --model-base Latxa-3.1-8B-Omni --split test
+#python -u evaluation.py --model-path saves_full_ft/final --split test
+python -u silence_experiment.py --model-path saves_full_ft/final --model-base Latxa-3.1-8B-Omni --split test --limit 500

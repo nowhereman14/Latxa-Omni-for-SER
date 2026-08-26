@@ -4,8 +4,10 @@ models/Latxa-Omni/
 models/LLaMA-Omni/
 # Ignore heavy files related to the models loaded
 **/Latxa-3.1-8B-Omni/
+saves*/
 *.pt
 *.pth
+*.safetensors
 
 .ipynb_checkpoints/
 *.safetensors
@@ -16,6 +18,17 @@ models/LLaMA-Omni/
 README.md
 __pycache__/
 *.jsonl
+*.json
+*.wav
+*.png
 *.pyc
 *.pyo
 *.egg-info/
+
+#Trash files
+models/Latxa-Omni-Emotion/sketches/
+models/Latxa-Omni-Emotion/check_forward.py
+models/Latxa-Omni-Emotion/check_forward.slurm
+models/Latxa-Omni-Emotion/inspect_modules.slurm
+models/Latxa-Omni-Emotion/silence_experiment.py
+models/Latxa-Omni-Emotion/smooth.py

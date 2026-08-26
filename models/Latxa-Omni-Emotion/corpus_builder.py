@@ -2,6 +2,8 @@ import re
 import os
 import json
 
+DATA_ROOT = os.environ.get("SER_DATA_ROOT", "/scratch/agarciam/tfm/data")
+
 def parse_gaitu(folder_path, file_name):
     speaker = folder_path.rstrip('/').split('/')[-2].replace('_emocional', '')
     emotion = re.sub(r'^([A-Za-z]+).*', r'\1', file_name)
@@ -47,7 +49,7 @@ CORPUS_PARSERS = {
         # TTS_DB folders included in this study.
         # Speakers like aintzane_eu, amaia_eu, andrea_eu, etc. are excluded:
         # no emotion annotation
-TTSDB_BASE = "/scratch/agarciam/tfm/data/TTS_DB"
+TTSDB_BASE = os.path.join(DATA_ROOT, "TTS_DB")
 TTSDB_FOLDERS = [
 "karolina_eu", "karolina_eu_angry",
 "karolina_eu_happy", "karolina_eu_sad", "karolina_eu_surprised",
@@ -56,19 +58,19 @@ TTSDB_FOLDERS = [
 "kepa_eu", "kepa_eu_angry", "kepa_eu_happy", "kepa_eu_sad", "amaia_eu", "inaki_eu"]
 
 # --- EMOZIOAK ---
-EMOZIOAK_BASE = "/scratch/agarciam/tfm/data/HiTZSpeechSynthesisEmozioak_Dataset"
+EMOZIOAK_BASE = os.path.join(DATA_ROOT, "HiTZSpeechSynthesisEmozioak_Dataset")
 EMOZIOAK_FOLDERS = ["Antton", "Maider"]
 
 # --- GAITU ---
         # TTS_GAITU-DATA folders included in this study.
         # Speakers like jon, miren, nerea, etc. are excluded:
         # no emotion annotation
-GAITU_BASE = "/scratch/agarciam/tfm/data/TTS_GAITU-DATA"
+GAITU_BASE = os.path.join(DATA_ROOT, "TTS_GAITU-DATA")
 GAITU_FOLDERS = ["mikel_emocional", "estitxu_emocional"]
 
 def build_entries(folder_path):
     entries = []
-    corpus = folder_path.split('/')[5]
+    corpus = next((c for c in CORPUS_PARSERS if c in folder_path.split(os.sep)), None)
     parser = CORPUS_PARSERS.get(corpus)
     if parser is None:
         return entries
@@ -125,7 +127,7 @@ if __name__ == "__main__":
         print(f"WARNING: {len(unassigned)} entries with unknown speaker:")
         print(set(e["speaker"] for e in unassigned))
 
-    save_manifest(all_entries, "manifest.jsonl")
+    save_manifest(all_entries, "manifest_new.jsonl")
 
     print(f"Total entries: {len(all_entries)}")
     for split in ["train", "val", "test"]:

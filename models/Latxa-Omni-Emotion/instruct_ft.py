@@ -17,6 +17,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def load_manifest(path):
     entries = []
@@ -160,7 +161,7 @@ def fine_tuning(args):
         bf16=True,
         fp16=False,
         report_to="none",
-        deepspeed="/scratch/agarciam/tfm/models/Latxa-Omni-Emotion/omni_speech/train/ds_config.json",
+        deepspeed=os.path.join(SCRIPT_DIR, "omni_speech", "train", "ds_config.json"),
     )
 
     trainer = Trainer(
