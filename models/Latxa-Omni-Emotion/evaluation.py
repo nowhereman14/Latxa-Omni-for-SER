@@ -82,7 +82,7 @@ def evaluation(args):
             print(f"Processed {i}/{len(entries)}")
 
     results = {"y_true": y_true, "y_pred": y_pred, "speakers": speakers}
-    output_filename = f"{args.split}_predictions.json"
+    output_filename = f"{args.split}_predictions_ft_4.json"
     with open(output_filename, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(classification_report(y_true, y_pred))
