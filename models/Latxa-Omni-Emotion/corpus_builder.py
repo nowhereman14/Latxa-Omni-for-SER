@@ -1,6 +1,7 @@
 import re
 import os
 import json
+import random
 
 DATA_ROOT = os.environ.get("SER_DATA_ROOT", "/scratch/agarciam/tfm/data")
 
@@ -55,7 +56,7 @@ TTSDB_FOLDERS = [
 "karolina_eu_happy", "karolina_eu_sad", "karolina_eu_surprised",
 "pello2004_eu", "pello2004_eu_angry", "pello2004_eu_happy", "pello2004_eu_sad", "pello2004_eu_surprised",
 "jaione_eu", "jaione_eu_angry", "jaione_eu_happy", "jaione_eu_sad",
-"kepa_eu", "kepa_eu_angry", "kepa_eu_happy", "kepa_eu_sad", "amaia_eu", "inaki_eu"]
+"kepa_eu", "kepa_eu_angry", "kepa_eu_happy", "kepa_eu_sad"]
 
 # --- EMOZIOAK ---
 EMOZIOAK_BASE = os.path.join(DATA_ROOT, "HiTZSpeechSynthesisEmozioak_Dataset")
@@ -85,9 +86,9 @@ def build_entries(folder_path):
         entries.append({"input": full_path, "output": emotion, "speaker": speaker})
     return entries
 
-TRAIN_SPEAKERS = {"karolina", "jaione", "Antton", "estitxu", "mikel"}
-VAL_SPEAKERS = {"pello2004"}
-TEST_SPEAKERS = {"Maider", "kepa", "amaia","inaki"}
+TRAIN_SPEAKERS = {"jaione", "Antton", "kepa", "Maider", "mikel"}
+VAL_SPEAKERS = {"karolina"}
+TEST_SPEAKERS = {"pello2004", "estitxu"}
 
 def assign_split(speaker):
     if speaker in TRAIN_SPEAKERS:
@@ -103,6 +104,26 @@ def save_manifest(entries, output_path):
         for entry in entries:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
+def subsample_neu(entries, speakers_to_fix, neu_label="neutroa", seed=42):
+    rng = random.Random(seed)
+    by_speaker = {}
+    for e in entries:
+        by_speaker.setdefault(e["speaker"], []).append(e)
+
+    kept = []
+    for speaker, es in by_speaker.items():
+        if speaker not in speakers_to_fix:
+            kept.extend(es)
+            continue
+
+        neu = [e for e in es if e["output"] == neu_label]
+        other = [e for e in es if e["output"] != neu_label]
+        target = round(len(other) / len(set(e["output"] for e in other)))
+        if len(neu) > target:
+            neu = rng.sample(neu, target)
+        kept.extend(other + neu)
+    return kept
+
 if __name__ == "__main__": 
     all_entries = []
     for folder in TTSDB_FOLDERS:
@@ -117,8 +138,8 @@ if __name__ == "__main__":
         full_folder_path = os.path.join(GAITU_BASE, folder, "wav")
         all_entries += build_entries(full_folder_path)
 
-    print(f"Total entries: {len(all_entries)}")
-    
+    all_entries = subsample_neu(all_entries, speakers_to_fix={"mikel", "estitxu"})
+
     for entry in all_entries:
         entry["split"] = assign_split(entry["speaker"])
 
@@ -127,7 +148,7 @@ if __name__ == "__main__":
         print(f"WARNING: {len(unassigned)} entries with unknown speaker:")
         print(set(e["speaker"] for e in unassigned))
 
-    save_manifest(all_entries, "manifest_new.jsonl")
+    save_manifest(all_entries, "manifests_cv/manifest_5.jsonl")
 
     print(f"Total entries: {len(all_entries)}")
     for split in ["train", "val", "test"]:
