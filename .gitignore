@@ -1,19 +1,22 @@
 # Ignore data folder
 data/
-models/Latxa-Omni/
-models/LLaMA-Omni/
+
 # Ignore heavy files related to the models loaded
 **/Latxa-3.1-8B-Omni/
+**/omni_speech
+**/acoustic_features
 saves*/
 *.pt
 *.pth
 *.safetensors
+*.txt
 
 .ipynb_checkpoints/
 *.safetensors
 *.bin
 *.npy
 *.log
+*.sh
 
 README.md
 __pycache__/
@@ -23,12 +26,23 @@ __pycache__/
 *.png
 *.pyc
 *.pyo
+*.out*
+*.err*
 *.egg-info/
 
 #Trash files
+models/Latxa-Omni-Emotion/erantzuna.*
 models/Latxa-Omni-Emotion/sketches/
 models/Latxa-Omni-Emotion/check_forward.py
 models/Latxa-Omni-Emotion/check_forward.slurm
 models/Latxa-Omni-Emotion/inspect_modules.slurm
 models/Latxa-Omni-Emotion/silence_experiment.py
 models/Latxa-Omni-Emotion/smooth.py
+models/Latxa-Omni-Emotion/filtrar_neu_por_texto.py
+models/Latxa-Omni-Emotion/prueba.py
+models/Latxa-Omni-Emotion/diagnostico.py
+models/Latxa-Omni-Emotion/prueba.slurm
+models/Latxa-Omni-Emotion/extract_acc.py
+parselmouth_testing.py
+sound_2.png
+sound.png

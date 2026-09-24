@@ -9,7 +9,7 @@ from system_prompt import load_prompt
 from omni_speech.conversation import conv_templates
 from omni_speech.model.builder import create_model
 from omni_speech.datasets.preprocess import tokenizer_speech_token
-from training.instruct_ft import load_manifest
+from training_ser.instruct_ft import load_manifest
 
 def build_inference_prompt(conv_mode):
     conv = conv_templates[conv_mode].copy()
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", type=str, default="saves/final")
     parser.add_argument("--model-base", type=str, default="Latxa-3.1-8B-Omni")
-    parser.add_argument("--manifest-path", type=str, default="manifest.jsonl")
+    parser.add_argument("--manifest-path", type=str, default="manifests_cv_ser/manifest_1.jsonl")
     parser.add_argument("--split", type=str, default="test", choices=["train", "val", "test"])
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--conv_mode", type=str, default="llama_3")

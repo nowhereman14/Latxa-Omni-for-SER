@@ -18,7 +18,7 @@ export PYTHONPATH="$PWD:$PYTHONPATH"
 
 mkdir -p val_predictions
 
-for OUTPUT_DIR in saves_full_ft_5; do
+for OUTPUT_DIR in saves_full_ft_ser; do
     for checkpoint in ${OUTPUT_DIR}/checkpoint-*; do
         step=$(basename "$checkpoint" | sed 's/checkpoint-//')
         echo "=================================================="
